@@ -1,11 +1,29 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TurismoGest - Gestión profesional de pisos turísticos</title>
+    <title>PropiedadExpress - Gestión Profesional de Pisos Turísticos en Alicante</title>
+    <meta name="description" content="Optimizamos y gestionamos tu piso turístico en Alicante para maximizar ingresos. Servicio completo con precios dinámicos, limpieza profesional y atención 24/7.">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563EB',
+                        secondary: '#0891B2',
+                        accent: '#0C4A6E'
+                    }
+                }
+            }
+        }
+    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
         
@@ -14,642 +32,880 @@
             scroll-behavior: smooth;
         }
         
-        .hero-gradient {
-            background: linear-gradient(135deg, #6B73FF 0%, #000DFF 50%, #2B32B2 100%);
+        .bg-gradient {
+            background: linear-gradient(135deg, #2563EB 0%, #0891B2 100%);
         }
         
-        .btn-gradient {
-            background: linear-gradient(135deg, #6B73FF 0%, #000DFF 100%);
+        .sticky-nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
             transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         
-        .btn-gradient:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        .scroll-margin {
+            scroll-margin-top: 100px;
         }
         
-        .card-hover:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        .timeline-step {
+            position: relative;
+            padding-left: 40px;
         }
         
-        .feature-icon {
-            background: linear-gradient(135deg, #6B73FF 0%, #000DFF 100%);
+        .timeline-step:before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 0;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #2563EB;
+            z-index: 1;
+        }
         
-            -webkit-text-fill-color: transparent;
+        .timeline-step:after {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 12px;
+            height: calc(100% - 30px);
+            width: 2px;
+            background: #2563EB;
         }
         
         .testimonial-card {
-            background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
-            box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+        
+        .testimonial-card:hover {
+            transform: translateY(-10px);
+        }
+        
+        .faq-item {
+            margin-bottom: 15px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .faq-question {
+            cursor: pointer;
+            padding: 20px;
+            position: relative;
+        }
+        
+        .faq-question:after {
+            content: '\f067';
+            font-family: 'Font Awesome 6 Free';
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            transition: all 0.3s ease;
+        }
+        
+        .faq-question.active:after {
+            content: '\f068';
+        }
+        
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        .floating-cta {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 999;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(37, 99, 235, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+        }
+        
+        @media (max-width: 768px) {
+            .timeline-step:after {
+                display: none;
+            }
         }
     </style>
 </head>
-<body>
-    <!-- Header/Navbar -->
-    <header class="sticky top-0 z-50 bg-white shadow-sm">
-        <div class="container mx-auto px-4 py-4">
-            <div class="flex justify-between items-center">
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="sticky-nav bg-white shadow-md">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <!-- Logo -->
                 <div class="flex items-center">
-                    <i class="fas fa-home-alt text-3xl mr-2 text-indigo-600"></i>
-                    <span class="text-2xl font-bold text-gray-800">Turismo<span class="text-indigo-600">Gest</span></span>
+                    <div class="bg-primary w-10 h-10 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-home text-white text-xl"></i>
+                    </div>
+                    <span class="ml-3 text-xl font-bold text-accent">Propiedad<span class="text-primary">Express</span></span>
                 </div>
-                <nav class="hidden md:flex items-center space-x-10">
-                    <a href="#servicios" class="text-gray-700 hover:text-indigo-600 font-medium">Servicios</a>
-                    <a href="#planes" class="text-gray-700 hover:text-indigo-600 font-medium">Planes</a>
-                    <a href="#beneficios" class="text-gray-700 hover:text-indigo-600 font-medium">Beneficios</a>
-                    <a href="#testimonios" class="text-gray-700 hover:text-indigo-600 font-medium">Testimonios</a>
-                    <a href="#contacto" class="px-5 py-2 rounded-full btn-gradient text-white font-medium">Contacto</a>
+                
+                <!-- Desktop Navigation -->
+                <nav class="hidden md:flex items-center space-x-8">
+                    <a href="#inicio" class="font-medium hover:text-primary scroll-margin">Inicio</a>
+                    <a href="#servicios" class="font-medium hover:text-primary scroll-margin">Servicios</a>
+                    <a href="#trabajo" class="font-medium hover:text-primary scroll-margin">Cómo trabajamos</a>
+                    <a href="#propietarios" class="font-medium hover:text-primary scroll-margin">Propietarios</a>
+                    <a href="#faq" class="font-medium hover:text-primary scroll-margin">FAQ</a>
+                    <a href="#contacto" class="font-medium hover:text-primary scroll-margin">Contacto</a>
                 </nav>
-                <button class="md:hidden text-gray-700">
+                
+                <!-- CTA Button Desktop -->
+                <button class="hidden md:block bg-primary hover:bg-accent text-white font-bold py-2 px-6 rounded-full transition-all">
+                    Valora tu piso
+                </button>
+                
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-button" class="md:hidden text-gray-500">
                     <i class="fas fa-bars text-2xl"></i>
                 </button>
             </div>
         </div>
+        
+        <!-- Mobile Navigation -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white py-4 px-4 border-t">
+            <div class="flex flex-col space-y-4">
+                <a href="#inicio" class="font-medium hover:text-primary scroll-margin">Inicio</a>
+                <a href="#servicios" class="font-medium hover:text-primary scroll-margin">Servicios</a>
+                <a href="#trabajo" class="font-medium hover:text-primary scroll-margin">Cómo trabajamos</a>
+                <a href="#propietarios" class="font-medium hover:text-primary scroll-margin">Propietarios</a>
+                <a href="#faq" class="font-medium hover:text-primary scroll-margin">FAQ</a>
+                <a href="#contacto" class="font-medium hover:text-primary scroll-margin">Contacto</a>
+                <button class="bg-primary hover:bg-accent text-white font-bold py-2 px-4 rounded-full transition-all">
+                    Valora tu piso
+                </button>
+            </div>
+        </div>
     </header>
-
+    
     <!-- Hero Section -->
-    <section class="hero-gradient text-white">
-        <div class="container mx-auto px-4 py-20 md:py-32">
-            <div class="flex flex-col md:flex-row items-center">
+    <section id="inicio" class="pt-20 scroll-margin">
+        <div class="bg-gradient text-white py-20">
+            <div class="container mx-auto px-4 flex flex-col md:flex-row items-center">
                 <div class="md:w-1/2 mb-10 md:mb-0">
-                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">Gestiona tu alojamiento turístico sin complicaciones</h1>
-                    <p class="text-xl mb-8 opacity-90">Deja la gestión de tu propiedad en nuestras manos y disfruta de los ingresos sin estrés. Servicio profesional para propietarios de pisos turísticos.</p>
-                    <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-                        <a href="#planes" class="px-8 py-4 bg-white text-indigo-600 font-bold rounded-full text-center hover:bg-gray-100 transition duration-300">Ver planes disponibles</a>
-                        <a href="#contacto" class="px-8 py-4 border-2 border-white text-white font-bold rounded-full text-center hover:bg-white hover:text-indigo-600 transition duration-300">Hablar con un asesor</a>
-                    </div>
+                    <h1 class="text-4xl md:text-5xl font-bold mb-6 animate__animated animate__fadeInDown">La mejor gestión de pisos turísticos en Alicante</h1>
+                    <p class="text-xl mb-8 animate__animated animate__fadeIn animate__delay-1s">Automatizamos, optimizamos y cuidamos tu vivienda turística como si fuera nuestra.</p>
+                    <button class="bg-white text-primary font-bold py-4 px-8 rounded-full text-lg hover:bg-gray-100 transition-all animate__animated animate__fadeInUp animate__delay-1s">
+                        Solicita valoración gratuita
+                    </button>
+                    <p class="mt-4 text-sm animate__animated animate__fadeIn animate__delay-2s">
+                        <i class="fas fa-check-circle"></i> Sin compromiso &nbsp;&nbsp;
+                        <i class="fas fa-check-circle"></i> Sin permanencia
+                    </p>
                 </div>
-                <div class="md:w-1/2 flex justify-center">
-                    <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" alt="Piso turístico moderno" class="rounded-xl shadow-2xl w-full max-w-lg object-cover h-96 md:h-auto">
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Trust Badges -->
-    <div class="bg-gray-50 py-8">
-        <div class="container mx-auto px-4">
-            <p class="text-center text-gray-500 mb-6">Confían en nosotros</p>
-            <div class="flex flex-wrap justify-center items-center gap-8 md:gap-16">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Airbnb_Logo_B%C3%A9lo.svg" alt="Airbnb" class="h-8 opacity-70">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/7/75/Booking.com_logo.svg" alt="Booking" class="h-10 opacity-70">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/d/df/Vrbo_logo.svg" alt="VRBO" class="h-10 opacity-70">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/c/ca/HomeAway.svg" alt="HomeAway" class="h-8 opacity-70">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Tripadvisor_logo.svg/800px-Tripadvisor_logo.svg.png" alt="TripAdvisor" class="h-8 opacity-70">
-            </div>
-        </div>
-    </div>
-
-    <!-- Services Section -->
-    <section id="servicios" class="py-20 bg-white">
-        <div class="container mx-auto px-4">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Nuestros <span class="text-indigo-600">Servicios</span></h2>
-                <p class="text-xl text-gray-600 max-w-3xl mx-auto">Ofrecemos soluciones integrales adaptadas a tus necesidades para maximizar el rendimiento de tu propiedad</p>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                <div class="bg-gray-50 rounded-xl p-8 transition duration-300 card-hover">
-                    <div class="text-4xl mb-6 feature-icon">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
-                    <h3 class="text-xl font-bold mb-3 text-gray-800">Optimización de precios</h3>
-                    <p class="text-gray-600">Aplicamos algoritmos inteligentes que ajustan los precios automáticamente según la demanda, temporada y eventos locales.</p>
-                </div>
-                
-                <div class="bg-gray-50 rounded-xl p-8 transition duration-300 card-hover">
-                    <div class="text-4xl mb-6 feature-icon">
-                        <i class="fas fa-calendar-check"></i>
-                    </div>
-                    <h3 class="text-xl font-bold mb-3 text-gray-800">Gestión de reservas</h3>
-                    <p class="text-gray-600">Coordinamos todas las reservas, evitamos dobles reservas y optimizamos el calendario para máxima ocupación.</p>
-                </div>
-                
-                <div class="bg-gray-50 rounded-xl p-8 transition duration-300 card-hover">
-                    <div class="text-4xl mb-6 feature-icon">
-                        <i class="fas fa-broom"></i>
-                    </div>
-                    <h3 class="text-xl font-bold mb-3 text-gray-800">Limpieza profesional</h3>
-                    <p class="text-gray-600">Servicio de limpieza exhaustivo con checklist detallado antes de cada llegada de huéspedes (Plan Total).</p>
-                </div>
-                
-                <div class="bg-gray-50 rounded-xl p-8 transition duration-300 card-hover">
-                    <div class="text-4xl mb-6 feature-icon">
-                        <i class="fas fa-camera"></i>
-                    </div>
-                    <h3 class="text-xl font-bold mb-3 text-gray-800">Fotografía profesional</h3>
-                    <p class="text-gray-600">Sesión fotográfica profesional para destacar tu propiedad y aumentar las reservas (Plan Total).</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Pricing Plans -->
-    <section id="planes" class="py-20 bg-gray-50">
-        <div class="container mx-auto px-4">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Nuestros <span class="text-indigo-600">Planes</span></h2>
-                <p class="text-xl text-gray-600 max-w-3xl mx-auto">Elige el plan que mejor se adapte a tus necesidades y nivel de compromiso</p>
-            </div>
-            
-            <div class="flex flex-col lg:flex-row justify-center items-center gap-8 lg:gap-4">
-                <!-- Plan Parcial -->
-                <div class="w-full max-w-md bg-white rounded-xl shadow-lg overflow-hidden transition duration-500 card-hover">
-                    <div class="px-8 py-6">
-                        <div class="text-center">
-                            <h3 class="text-2xl font-bold text-indigo-600 mb-1">Gestión Parcial</h3>
-                            <p class="text-gray-600 mb-6">Ideal para propietarios que desean mantener cierto control</p>
-                        </div>
-                        <div class="text-center mb-8">
-                            <span class="text-5xl font-bold text-gray-800">15%</span>
-                            <span class="text-xl text-gray-600">de comisión</span>
-                        </div>
-                        <ul class="space-y-4 mb-8">
-                            <li class="flex items-start">
-                                <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
-                                <span>Alta en plataformas de reservas (Airbnb, Booking, etc.)</span>
-                            </li>
-                            <li class="flex items-start">
-                                <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
-                                <span>Gestión dinámica de precios automática</span>
-                            </li>
-                            <li class="flex items-start">
-                                <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
-                                <span>Herramientas de automatización de mensajes</span>
-                            </li>
-                            <li class="flex items-start opacity-60">
-                                <i class="fas fa-times-circle text-gray-400 mt-1 mr-3"></i>
-                                <span>Servicio de Check-in/Check-out</span>
-                            </li>
-                            <li class="flex items-start opacity-60">
-                                <i class="fas fa-times-circle text-gray-400 mt-1 mr-3"></i>
-                                <span>Limpieza profesional incluida</span>
-                            </li>
-                            <li class="flex items-start opacity-60">
-                                <i class="fas fa-times-circle text-gray-400 mt-1 mr-3"></i>
-                                <span>Sesión fotográfica profesional</span>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="px-8 py-4 bg-gray-50 text-center">
-                        <a href="#contacto" class="block w-full px-6 py-3 rounded-lg btn-gradient text-white font-bold transition duration-300">Contratar ahora</a>
-                    </div>
-                </div>
-                
-                <!-- Plan Total - Featured -->
-                <div class="w-full max-w-md bg-indigo-600 text-white rounded-xl shadow-2xl transform scale-105 z-10">
-                    <div class="px-8 py-6">
-                        <div class="text-center mb-3">
-                            <span class="inline-block px-4 py-1 bg-yellow-400 text-indigo-900 rounded-full text-sm font-bold">MÁS POPULAR</span>
-                        </div>
-                        <div class="text-center">
-                            <h3 class="text-2xl font-bold mb-1">Gestión Total</h3>
-                            <p class="mb-6 opacity-90">Para propietarios que buscan una solución integral</p>
-                        </div>
-                        <div class="text-center mb-8">
-                            <span class="text-5xl font-bold">25%</span>
-                            <span class="text-xl opacity-90">de comisión</span>
-                        </div>
-                        <ul class="space-y-4 mb-8">
-                            <li class="flex items-start">
-                                <i class="fas fa-check-circle text-yellow-400 mt-1 mr-3"></i>
-                                <span>Todo lo del plan Parcial, más:</span>
-                            </li>
-                            <li class="flex items-start">
-                                <i class="fas fa-check-circle text-yellow-400 mt-1 mr-3"></i>
-                                <span>Gestión completa de Check-in/Check-out</span>
-                            </li>
-                            <li class="flex items-start">
-                                <i class="fas fa-check-circle text-yellow-400 mt-1 mr-3"></i>
-                                <span>Limpieza profesional antes de cada llegada</span>
-                            </li>
-                            <li class="flex items-start">
-                                <i class="fas fa-check-circle text-yellow-400 mt-1 mr-3"></i>
-                                <span>Sesión fotográfica profesional</span>
-                            </li>
-                            <li class="flex items-start">
-                                <i class="fas fa-check-circle text-yellow-400 mt-1 mr-3"></i>
-                                <span>Gestión de incidentes 24/7</span>
-                            </li>
-                            <li class="flex items-start">
-                                <i class="fas fa-check-circle text-yellow-400 mt-1 mr-3"></i>
-                                <span>Reposición de amenities</span>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="px-8 py-4 bg-indigo-700 text-center">
-                        <a href="#contacto" class="block w-full px-6 py-3 rounded-lg bg-white text-indigo-600 font-bold hover:bg-gray-100 transition duration-300">Contratar ahora</a>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="mt-12 text-center">
-                <p class="text-gray-600">¿Necesitas un plan personalizado? <a href="#contacto" class="text-indigo-600 font-medium underline">Contáctanos</a></p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Benefits Section -->
-    <section id="beneficios" class="py-20 bg-white">
-        <div class="container mx-auto px-4">
-            <div class="flex flex-col lg:flex-row items-center">
-                <div class="lg:w-1/2 mb-12 lg:mb-0 lg:pr-12">
-                    <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" alt="Propietario feliz" class="rounded-xl shadow-lg w-full">
-                </div>
-                <div class="lg:w-1/2">
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6">Beneficios de trabajar con <span class="text-indigo-600">TurismoGest</span></h2>
-                    <div class="space-y-6">
-                        <div class="flex">
-                            <div class="mr-6">
-                                <div class="flex items-center justify-center w-16 h-16 rounded-full bg-indigo-50 text-indigo-600">
-                                    <i class="fas fa-money-bill-wave text-2xl"></i>
+                <div class="md:w-1/2 flex justify-center animate__animated animate__fadeIn animate__delay-1s">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80" alt="Lujoso piso turístico en Alicante" class="rounded-xl shadow-2xl w-full max-w-lg">
+                        <div class="absolute -bottom-6 -right-6 bg-white p-4 rounded-lg shadow-lg">
+                            <div class="flex items-center">
+                                <div class="bg-gray-200 border-2 border-dashed rounded-xl w-16 h-16" />
+                                <div class="ml-3">
+                                    <p class="font-bold text-accent">+15 Plataformas</p>
+                                    <p class="text-sm text-gray-600">Publicamos tu propiedad</p>
                                 </div>
                             </div>
-                            <div>
-                                <h3 class="text-xl font-bold text-gray-800 mb-2">Mayores ingresos</h3>
-                                <p class="text-gray-600">Nuestro sistema de precios dinámicos y estrategias de marketing pueden aumentar tus ingresos hasta un 40%.</p>
-                            </div>
-                        </div>
-                        
-                        <div class="flex">
-                            <div class="mr-6">
-                                <div class="flex items-center justify-center w-16 h-16 rounded-full bg-indigo-50 text-indigo-600">
-                                    <i class="fas fa-clock text-2xl"></i>
-                                </div>
-                            </div>
-                            <div>
-                                <h3 class="text-xl font-bold text-gray-800 mb-2">Ahorra tiempo</h3>
-                                <p class="text-gray-600">Dedica tu tiempo a lo que realmente importa mientras nosotros nos encargamos de todo el trabajo operativo.</p>
-                            </div>
-                        </div>
-                        
-                        <div class="flex">
-                            <div class="mr-6">
-                                <div class="flex items-center justify-center w-16 h-16 rounded-full bg-indigo-50 text-indigo-600">
-                                    <i class="fas fa-star text-2xl"></i>
-                                </div>
-                            </div>
-                            <div>
-                                <h3 class="text-xl font-bold text-gray-800 mb-2">Mejores valoraciones</h3>
-                                <p class="text-gray-600">Nuestro servicio profesional garantiza experiencias positivas para tus huéspedes, mejorando tus reseñas.</p>
-                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
-
-    <!-- Stats Section -->
-    <section class="py-16 bg-indigo-600 text-white">
-        <div class="container mx-auto px-4">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-                <div>
-                    <div class="text-5xl font-bold mb-2">98%</div>
-                    <div class="text-lg opacity-90">Ocupación promedio</div>
-                </div>
-                <div>
-                    <div class="text-5xl font-bold mb-2">4.9</div>
-                    <div class="text-lg opacity-90">Puntuación media en plataformas</div>
-                </div>
-                <div>
-                    <div class="text-5xl font-bold mb-2">150+</div>
-                    <div class="text-lg opacity-90">Propiedades gestionadas</div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Testimonials -->
-    <section id="testimonios" class="py-20 bg-gray-50">
-        <div class="container mx-auto px-4">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Lo que dicen nuestros <span class="text-indigo-600">clientes</span></h2>
-                <p class="text-xl text-gray-600 max-w-3xl mx-auto">Testimonios reales de propietarios que han confiado en nosotros</p>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div class="p-8 rounded-xl testimonial-card">
-                    <div class="flex items-center mb-6">
-                        <div class="w-12 h-12 rounded-full overflow-hidden mr-4">
-                            <img src="https://randomuser.me/api/portraits/women/32.jpg" alt="María García" class="w-full h-full object-cover">
-                        </div>
-                        <div>
-                            <h4 class="font-bold">María García</h4>
-                            <p class="text-gray-600 text-sm">Barcelona</p>
-                        </div>
-                    </div>
-                    <p class="text-gray-700 mb-4">"Desde que contraté el servicio de gestión total con TurismoGest, mi apartamento en el centro de Barcelona ha estado siempre al máximo de ocupación y mis ingresos han aumentado un 30%."</p>
-                    <div class="flex text-yellow-400">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                    </div>
-                </div>
-                
-                <div class="p-8 rounded-xl testimonial-card">
-                    <div class="flex items-center mb-6">
-                        <div class="w-12 h-12 rounded-full overflow-hidden mr-4">
-                            <img src="https://randomuser.me/api/portraits/men/75.jpg" alt="Carlos Rodríguez" class="w-full h-full object-cover">
-                        </div>
-                        <div>
-                            <h4 class="font-bold">Carlos Rodríguez</h4>
-                            <p class="text-gray-600 text-sm">Madrid</p>
-                        </div>
-                    </div>
-                    <p class="text-gray-700 mb-4">"La gestión dinámica de precios ha sido un cambio radical. Ahora obtengo ingresos consistentes incluso en temporada baja. Todo automático sin que yo tenga que hacer nada."</p>
-                    <div class="flex text-yellow-400">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                    </div>
-                </div>
-                
-                <div class="p-8 rounded-xl testimonial-card">
-                    <div class="flex items-center mb-6">
-                        <div class="w-12 h-12 rounded-full overflow-hidden mr-4">
-                            <img src="https://randomuser.me/api/portraits/women/65.jpg" alt="Laura Fernández" class="w-full h-full object-cover">
-                        </div>
-                        <div>
-                            <h4 class="font-bold">Laura Fernández</h4>
-                            <p class="text-gray-600 text-sm">Valencia</p>
-                        </div>
-                    </div>
-                    <p class="text-gray-700 mb-4">"El servicio de limpieza y check-in/check-out ha sido fundamental. Mis huéspedes están encantados con el trato profesional y las valoraciones han mejorado notablemente."</p>
-                    <div class="flex text-yellow-400">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star-half-alt"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- CTA Section -->
-    <section class="py-20 bg-white">
-        <div class="container mx-auto px-4">
-            <div class="bg-gradient-to-r from-indigo-600 to-blue-600 rounded-2xl p-12 text-white text-center">
-                <h2 class="text-3xl md:text-4xl font-bold mb-6">¿Listo para maximizar los ingresos de tu propiedad?</h2>
-                <p class="text-xl mb-8 max-w-3xl mx-auto opacity-90">Contáctanos hoy mismo y descubre cómo podemos transformar la gestión de tu alojamiento turístico</p>
-                <a href="#contacto" class="inline-block px-8 py-4 bg-white text-indigo-600 font-bold rounded-full hover:bg-gray-100 transition duration-300">Hablar con un experto</a>
-            </div>
-        </div>
-    </section>
-
-    <!-- FAQ Section -->
+    
+    <!-- Why Us Section -->
     <section class="py-20 bg-gray-50">
         <div class="container mx-auto px-4">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Preguntas <span class="text-indigo-600">Frecuentes</span></h2>
-                <p class="text-xl text-gray-600 max-w-3xl mx-auto">Resolvemos tus dudas más comunes</p>
-            </div>
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-accent mb-16">¿Por qué trabajar con nosotros?</h2>
             
-            <div class="max-w-4xl mx-auto">
-                <div class="space-y-4">
-                    <div class="p-6 bg-white rounded-xl shadow-sm">
-                        <button class="flex items-center justify-between w-full text-left font-medium text-gray-800">
-                            <span>¿Cuál es la diferencia entre los planes Parcial y Total?</span>
-                            <i class="fas fa-chevron-down ml-4 text-indigo-600"></i>
-                        </button>
-                        <div class="mt-3 text-gray-600">
-                            <p>El plan Parcial incluye la gestión online de tu propiedad (alta en plataformas, precios dinámicos y automatización), mientras que el plan Total añade servicios presenciales (check-in/check-out, limpieza profesional, fotografía y gestión completa de incidencias).</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                <!-- Benefit 1 -->
+                <div class="bg-white p-8 rounded-xl shadow-lg text-center hover:shadow-xl transition-all">
+                    <div class="bg-primary w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-chart-line text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Incrementamos tus ingresos</h3>
+                    <p class="text-gray-600">Con precios dinámicos y estrategias de ocupación avanzadas, maximizamos tus ingresos en cada temporada.</p>
+                </div>
+                
+                <!-- Benefit 2 -->
+                <div class="bg-white p-8 rounded-xl shadow-lg text-center hover:shadow-xl transition-all">
+                    <div class="bg-primary w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-calendar-check text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Ocupación optimizada</h3>
+                    <p class="text-gray-600">Gracias a nuestro sistema de IA, logramos ocupaciones del 85% incluso en temporada baja.</p>
+                </div>
+                
+                <!-- Benefit 3 -->
+                <div class="bg-white p-8 rounded-xl shadow-lg text-center hover:shadow-xl transition-all">
+                    <div class="bg-primary w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-users-cog text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Gestión integral</h3>
+                    <p class="text-gray-600">De la limpieza al mantenimiento y atención al huésped, nos ocupamos de cada detalle por ti.</p>
+                </div>
+                
+                <!-- Benefit 4 -->
+                <div class="bg-white p-8 rounded-xl shadow-lg text-center hover:shadow-xl transition-all">
+                    <div class="bg-primary w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-file-alt text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Cumplimos normativas</h3>
+                    <p class="text-gray-600">Nos encargamos de todos los trámites para cumplir con la normativa turística de la Comunidad Valenciana.</p>
+                </div>
+                
+                <!-- Benefit 5 -->
+                <div class="bg-white p-8 rounded-xl shadow-lg text-center hover:shadow-xl transition-all">
+                    <div class="bg-primary w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-ban text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Sin permanencia</h3>
+                    <p class="text-gray-600">Sin contratos a largo plazo. Puedes finalizar nuestros servicios en cualquier momento.</p>
+                </div>
+                
+                <!-- Benefit 6 -->
+                <div class="bg-white p-8 rounded-xl shadow-lg text-center hover:shadow-xl transition-all">
+                    <div class="bg-primary w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-lock-open text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Acceso 24/7</h3>
+                    <p class="text-gray-600">Accede a tu panel personalizado para ver tus reservas, ingresos y más en cualquier momento.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Services Section -->
+    <section id="servicios" class="py-20 bg-white scroll-margin">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-accent mb-16">Gestionamos todo por ti</h2>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Service 1 -->
+                <div class="flex items-start">
+                    <div class="bg-primary p-3 rounded-lg mr-4">
+                        <i class="fas fa-camera text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold mb-2">Fotografía profesional</h3>
+                        <p class="text-gray-600">Realizamos sesiones fotográficas con equipos profesionales para destacar tu propiedad.</p>
+                    </div>
+                </div>
+                
+                <!-- Service 2 -->
+                <div class="flex items-start">
+                    <div class="bg-primary p-3 rounded-lg mr-4">
+                        <i class="fas fa-paint-roller text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold mb-2">Decoración inicial</h3>
+                        <p class="text-gray-600">Asesoramiento en decoración para maximizar el atractivo de tu propiedad.</p>
+                    </div>
+                </div>
+                
+                <!-- Service 3 -->
+                <div class="flex items-start">
+                    <div class="bg-primary p-3 rounded-lg mr-4">
+                        <i class="fas fa-share-alt text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold mb-2">Publicación en +15 plataformas</h3>
+                        <p class="text-gray-600">Airbnb, Booking, Vrbo y más. Mayor visibilidad, más reservas.</p>
+                    </div>
+                </div>
+                
+                <!-- Service 4 -->
+                <div class="flex items-start">
+                    <div class="bg-primary p-3 rounded-lg mr-4">
+                        <i class="fas fa-calendar-alt text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold mb-2">Gestión de reservas</h3>
+                        <p class="text-gray-600">Coordinación completa de reservas y sincronización de calendarios.</p>
+                    </div>
+                </div>
+                
+                <!-- Service 5 -->
+                <div class="flex items-start">
+                    <div class="bg-primary p-3 rounded-lg mr-4">
+                        <i class="fas fa-headset text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold mb-2">Comunicación 24/7</h3>
+                        <p class="text-gray-600">Atención al huésped durante toda su estancia en múltiples idiomas.</p>
+                    </div>
+                </div>
+                
+                <!-- Service 6 -->
+                <div class="flex items-start">
+                    <div class="bg-primary p-3 rounded-lg mr-4">
+                        <i class="fas fa-broom text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold mb-2">Limpieza profesional</h3>
+                        <p class="text-gray-600">Equipos especializados entre cada estancia con estándares de hotel.</p>
+                    </div>
+                </div>
+                
+                <!-- Service 7 -->
+                <div class="flex items-start">
+                    <div class="bg-primary p-3 rounded-lg mr-4">
+                        <i class="fas fa-key text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold mb-2">Check-in automático</h3>
+                        <p class="text-gray-600">Sistemas de acceso inteligente para mayor comodidad de los huéspedes.</p>
+                    </div>
+                </div>
+                
+                <!-- Service 8 -->
+                <div class="flex items-start">
+                    <div class="bg-primary p-3 rounded-lg mr-4">
+                        <i class="fas fa-tools text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold mb-2">Mantenimiento</h3>
+                        <p class="text-gray-600">Reparaciones rápidas y soluciones técnicas para cualquier imprevisto.</p>
+                    </div>
+                </div>
+                
+                <!-- Service 9 -->
+                <div class="flex items-start">
+                    <div class="bg-primary p-3 rounded-lg mr-4">
+                        <i class="fas fa-robot text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold mb-2">Optimización con IA</h3>
+                        <p class="text-gray-600">Precios dinámicos basados en algoritmos inteligentes para maximizar ingresos.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- How We Work Section -->
+    <section id="trabajo" class="py-20 bg-gray-50 scroll-margin">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-accent mb-16">Así es trabajar con nosotros</h2>
+            
+            <div class="max-w-3xl mx-auto">
+                <!-- Step 1 -->
+                <div class="timeline-step mb-16">
+                    <div class="bg-white p-8 rounded-xl shadow-lg">
+                        <div class="inline-block bg-primary text-white text-lg font-bold rounded-full w-10 h-10 flex items-center justify-center absolute -left-3 top-0">1</div>
+                        <h3 class="text-xl font-bold mb-4">Valoración gratuita</h3>
+                        <p class="text-gray-600">Analizamos tu propiedad y te presentamos un informe detallado de ingresos potenciales, todo sin costo ni compromiso.</p>
+                    </div>
+                </div>
+                
+                <!-- Step 2 -->
+                <div class="timeline-step mb-16">
+                    <div class="bg-white p-8 rounded-xl shadow-lg">
+                        <div class="inline-block bg-primary text-white text-lg font-bold rounded-full w-10 h-10 flex items-center justify-center absolute -left-3 top-0">2</div>
+                        <h3 class="text-xl font-bold mb-4">Preparación y publicación</h3>
+                        <p class="text-gray-600">Fotografiamos profesionalmente tu propiedad, creamos anuncios optimizados y los publicamos en las principales plataformas.</p>
+                    </div>
+                </div>
+                
+                <!-- Step 3 -->
+                <div class="timeline-step mb-16">
+                    <div class="bg-white p-8 rounded-xl shadow-lg">
+                        <div class="inline-block bg-primary text-white text-lg font-bold rounded-full w-10 h-10 flex items-center justify-center absolute -left-3 top-0">3</div>
+                        <h3 class="text-xl font-bold mb-4">Gestión completa</h3>
+                        <p class="text-gray-600">Nos encargamos de todas las reservas, atención al huésped, limpieza y mantenimiento. Tú sólo recibe los ingresos.</p>
+                    </div>
+                </div>
+                
+                <!-- Step 4 -->
+                <div class="timeline-step">
+                    <div class="bg-white p-8 rounded-xl shadow-lg">
+                        <div class="inline-block bg-primary text-white text-lg font-bold rounded-full w-10 h-10 flex items-center justify-center absolute -left-3 top-0">4</div>
+                        <h3 class="text-xl font-bold mb-4">Seguimiento y optimización</h3>
+                        <p class="text-gray-600">Accede a tu área privada para ver todos los datos en tiempo real. Optimizamos continuamente para mejores resultados.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Testimonials Section -->
+    <section class="py-20 bg-white">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-accent mb-16">Lo que dicen nuestros propietarios</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Testimonial 1 -->
+                <div class="testimonial-card bg-gray-50 p-8 rounded-xl shadow-lg">
+                    <div class="flex items-center mb-6">
+                        <img src="https://randomuser.me/api/portraits/women/32.jpg" alt="María G." class="w-16 h-16 rounded-full object-cover border-2 border-primary">
+                        <div class="ml-4">
+                            <h4 class="font-bold">María G.</h4>
+                            <p class="text-sm text-gray-600">Propietaria en Alicante Centro</p>
+                            <div class="flex text-yellow-400 mt-1">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
                         </div>
                     </div>
-                    
-                    <div class="p-6 bg-white rounded-xl shadow-sm">
-                        <button class="flex items-center justify-between w-full text-left font-medium text-gray-800">
-                            <span>¿Puedo cambiar de plan posteriormente?</span>
-                            <i class="fas fa-chevron-down ml-4 text-indigo-600"></i>
-                        </button>
-                        <div class="mt-3 text-gray-600">
-                            <p>Sí, puedes cambiar entre planes con un preaviso de 30 días. Nuestro equipo te asesorará sobre el proceso de transición para garantizar una experiencia sin problemas.</p>
+                    <p class="text-gray-600 italic mt-4 leading-relaxed">"Con PropiedadExpress he aumentado mis ingresos un 40% con el mismo piso. Su equipo de limpieza es impecable y la gestión de precios es espectacular."</p>
+                </div>
+                
+                <!-- Testimonial 2 -->
+                <div class="testimonial-card bg-gray-50 p-8 rounded-xl shadow-lg">
+                    <div class="flex items-center mb-6">
+                        <img src="https://randomuser.me/api/portraits/men/45.jpg" alt="Javier L." class="w-16 h-16 rounded-full object-cover border-2 border-primary">
+                        <div class="ml-4">
+                            <h4 class="font-bold">Javier L.</h4>
+                            <p class="text-sm text-gray-600">Propietario en Playa San Juan</p>
+                            <div class="flex text-yellow-400 mt-1">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
                         </div>
                     </div>
-                    
-                    <div class="p-6 bg-white rounded-xl shadow-sm">
-                        <button class="flex items-center justify-between w-full text-left font-medium text-gray-800">
-                            <span>¿Cada cuánto tiempo realizan la limpieza en el plan Total?</span>
-                            <i class="fas fa-chevron-down ml-4 text-indigo-600"></i>
-                        </button>
-                        <div class="mt-3 text-gray-600">
-                            <p>Realizamos una limpieza profesional completa antes de cada llegada de huéspedes. Si el alojamiento tiene estancias prolongadas (más de 7 noches), programamos limpiezas intermedias según lo acordado.</p>
+                    <p class="text-gray-600 italic mt-4 leading-relaxed">"La tranquilidad que me dan es increíble. Gestionan todo tan bien que casi olvido que tengo un piso alquilado. Los informes mensuales son claros y detallados."</p>
+                </div>
+                
+                <!-- Testimonial 3 -->
+                <div class="testimonial-card bg-gray-50 p-8 rounded-xl shadow-lg">
+                    <div class="flex items-center mb-6">
+                        <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Laura M." class="w-16 h-16 rounded-full object-cover border-2 border-primary">
+                        <div class="ml-4">
+                            <h4 class="font-bold">Laura M.</h4>
+                            <p class="text-sm text-gray-600">Propietaria en Cabo de las Huertas</p>
+                            <div class="flex text-yellow-400 mt-1">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
                         </div>
                     </div>
-                    
-                    <div class="p-6 bg-white rounded-xl shadow-sm">
-                        <button class="flex items-center justify-between w-full text-left font-medium text-gray-800">
-                            <span>¿Cómo funciona el sistema de precios dinámicos?</span>
-                            <i class="fas fa-chevron-down ml-4 text-indigo-600"></i>
-                        </button>
-                        <div class="mt-3 text-gray-600">
-                            <p>Nuestro algoritmo analiza múltiples factores como demanda estacional, eventos locales, competencia, historial de reservas y condiciones del mercado. Ajustamos automáticamente los precios para maximizar la ocupación y los ingresos.</p>
+                    <p class="text-gray-600 italic mt-4 leading-relaxed">"Lo que más valoro es su atención al huésped 24/7. He evitado tantos dolores de cabeza gracias a ellos. Además, la plataforma de propietarios es muy intuitiva."</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Comparison Section -->
+    <section id="propietarios" class="py-20 bg-gradient text-white scroll-margin">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-16">¿Gestionarlo tú o confiar en nosotros?</h2>
+            
+            <div class="bg-white rounded-xl shadow-xl overflow-hidden max-w-4xl mx-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-accent">
+                            <th class="py-6 px-8 text-left">Aspecto</th>
+                            <th class="py-6 px-8 text-center">Tú solo</th>
+                            <th class="py-6 px-8 text-center">Nosotros</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="border-b">
+                            <td class="py-5 px-8 text-gray-800 font-medium">Atención al huésped 24/7</td>
+                            <td class="py-5 px-8 text-center"><i class="fas fa-times text-red-500 text-xl"></i></td>
+                            <td class="py-5 px-8 text-center"><i class="fas fa-check text-green-500 text-xl"></i></td>
+                        </tr>
+                        <tr class="border-b bg-gray-50">
+                            <td class="py-5 px-8 text-gray-800 font-medium">Precios dinámicos con IA</td>
+                            <td class="py-5 px-8 text-center"><i class="fas fa-times text-red-500 text-xl"></i></td>
+                            <td class="py-5 px-8 text-center"><i class="fas fa-check text-green-500 text-xl"></i></td>
+                        </tr>
+                        <tr class="border-b">
+                            <td class="py-5 px-8 text-gray-800 font-medium">Check-in automático</td>
+                            <td class="py-5 px-8 text-center"><i class="fas fa-times text-red-500 text-xl"></i></td>
+                            <td class="py-5 px-8 text-center"><i class="fas fa-check text-green-500 text-xl"></i></td>
+                        </tr>
+                        <tr class="border-b bg-gray-50">
+                            <td class="py-5 px-8 text-gray-800 font-medium">Fotografía profesional</td>
+                            <td class="py-5 px-8 text-center"><i class="fas fa-times text-red-500 text-xl"></i></td>
+                            <td class="py-5 px-8 text-center"><i class="fas fa-check text-green-500 text-xl"></i></td>
+                        </tr>
+                        <tr class="border-b">
+                            <td class="py-5 px-8 text-gray-800 font-medium">Limpieza profesional</td>
+                            <td class="py-5 px-8 text-center"><i class="fas fa-times text-red-500 text-xl"></i></td>
+                            <td class="py-5 px-8 text-center"><i class="fas fa-check text-green-500 text-xl"></i></td>
+                        </tr>
+                        <tr class="border-b bg-gray-50">
+                            <td class="py-5 px-8 text-gray-800 font-medium">Mantenimiento urgente</td>
+                            <td class="py-5 px-8 text-center"><i class="fas fa-times text-red-500 text-xl"></i></td>
+                            <td class="py-5 px-8 text-center"><i class="fas fa-check text-green-500 text-xl"></i></td>
+                        </tr>
+                        <tr>
+                            <td class="py-5 px-8 text-gray-800 font-medium">Informes de rendimiento</td>
+                            <td class="py-5 px-8 text-center"><i class="fas fa-times text-red-500 text-xl"></i></td>
+                            <td class="py-5 px-8 text-center"><i class="fas fa-check text-green-500 text-xl"></i></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Lead Magnet Form -->
+    <section class="py-20 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <div class="bg-white rounded-xl shadow-2xl max-w-4xl mx-auto p-8 md:p-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-center text-accent mb-4">¿Quieres saber cuánto podrías ganar?</h2>
+                <p class="text-center text-gray-600 mb-8">Obtén una valoración gratuita de tu propiedad en menos de 24 horas</p>
+                
+                <form id="valuation-form" class="grid grid-cols-1 md:grid-cols-2 gap-6" onsubmit="submitValuationForm(event)">
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-2">Nombre completo*</label>
+                        <input type="text" class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Tu nombre" required>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-2">Email*</label>
+                        <input type="email" class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" placeholder="tu@email.com" required>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-2">Teléfono*</label>
+                        <input type="tel" class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" placeholder="+34 600 000 000" required>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-2">Tipo de propiedad</label>
+                        <select class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                            <option value="">Seleccione un tipo</option>
+                            <option value="apartamento">Apartamento</option>
+                            <option value="casa">Casa completa</option>
+                            <option value="estudio">Estudio</option>
+                            <option value="villa">Villa</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-gray-700 font-medium mb-2">Dirección del piso (opcional)</label>
+                        <input type="text" class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Calle, número, ciudad">
+                    </div>
+                    <div class="md:col-span-2 flex items-start">
+                        <input type="checkbox" class="mt-1 mr-2" required>
+                        <span class="text-sm text-gray-600">He leído y acepto la <a href="#" class="text-primary">Política de Privacidad</a>. Acepto recibir información comercial de PropiedadExpress.</span>
+                    </div>
+                    <div class="md:col-span-2">
+                        <button type="submit" class="w-full bg-primary hover:bg-accent text-white font-bold py-4 px-6 rounded-lg transition-all">Valorar mi piso gratis</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+    
+    <!-- FAQ Section -->
+    <section id="faq" class="py-20 bg-white scroll-margin">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-accent mb-16">Preguntas frecuentes de propietarios</h2>
+            
+            <div class="max-w-3xl mx-auto">
+                <!-- FAQ 1 -->
+                <div class="faq-item bg-gray-50">
+                    <div class="faq-question">
+                        <h3 class="font-bold">¿Cuál es el coste del servicio?</h3>
+                    </div>
+                    <div class="faq-answer">
+                        <div class="p-6 bg-white">
+                            <p>Nuestros honorarios son un porcentaje de los ingresos generados, que varía según el nivel de servicio que necesites. Todo está incluido sin costes adicionales. En nuestra valoración gratuita te detallaremos todos los costes y el margen neto que obtendrás.</p>
                         </div>
                     </div>
-                    
-                    <div class="p-6 bg-white rounded-xl shadow-sm">
-                        <button class="flex items-center justify-between w-full text-left font-medium text-gray-800">
-                            <span>¿Cuánto tiempo toma poner en marcha mi propiedad?</span>
-                            <i class="fas fa-chevron-down ml-4 text-indigo-600"></i>
-                        </button>
-                        <div class="mt-3 text-gray-600">
-                            <p>El tiempo varía según la preparación de la propiedad y el plan elegido. Para el plan Parcial, el proceso suele tomar 3-5 días hábiles. Para el plan Total, normalmente son 7-10 días (incluyendo la sesión fotográfica y preparación completa).</p>
+                </div>
+                
+                <!-- FAQ 2 -->
+                <div class="faq-item bg-gray-50">
+                    <div class="faq-question">
+                        <h3 class="font-bold">¿Puedo seguir usando mi piso cuando lo necesite?</h3>
+                    </div>
+                    <div class="faq-answer">
+                        <div class="p-6 bg-white">
+                            <p>Claro que sí. Tendrás acceso completo a tu calendario de reservas para bloquear los días que desees usar tu propiedad. Simplemente avísanos con al menos 48 horas de antelación para que podamos gestionar las reservas afectadas.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- FAQ 3 -->
+                <div class="faq-item bg-gray-50">
+                    <div class="faq-question">
+                        <h3 class="font-bold">¿Qué licencias necesitáis?</h3>
+                    </div>
+                    <div class="faq-answer">
+                        <div class="p-6 bg-white">
+                            <p>Nos encargamos de todo el proceso de legalización en la Comunidad Valenciana. Si tu propiedad aún no está registrada como vivienda turística, gestionaremos la obtención de la licencia obligatoria y nos encargaremos del cumplimiento normativo continuo, incluidos los pagos de impuestos.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- FAQ 4 -->
+                <div class="faq-item bg-gray-50">
+                    <div class="faq-question">
+                        <h3 class="font-bold">¿Tengo permanencia o contrato?</h3>
+                    </div>
+                    <div class="faq-answer">
+                        <div class="p-6 bg-white">
+                            <p>No. Trabajamos sin permanencia ni contratos de larga duración. Nuestros acuerdos son flexibles y renovables mensualmente. Puedes detener nuestros servicios en cualquier momento con un preaviso de 30 días.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- FAQ 5 -->
+                <div class="faq-item bg-gray-50">
+                    <div class="faq-question">
+                        <h3 class="font-bold">¿Cómo sabré cuánto gano?</h3>
+                    </div>
+                    <div class="faq-answer">
+                        <div class="p-6 bg-white">
+                            <p>Tendrás acceso a un área privada personalizada con dashboard de analíticas. Allí verás en tiempo real tus reservas, ingresos, ocupación y gastos. Mensualmente recibirás un estado de cuenta detallado y realizaremos transferencias automáticas a tu cuenta bancaria.</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
-
-    <!-- Contact Form -->
-    <section id="contacto" class="py-20 bg-white">
+    
+    <!-- Local SEO Section -->
+    <section id="contacto" class="py-20 bg-gray-50 scroll-margin">
         <div class="container mx-auto px-4">
-            <div class="flex flex-col lg:flex-row items-center gap-12">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-accent mb-16">Gestión de pisos turísticos en Alicante, El Campello, San Juan y alrededores</h2>
+            
+            <div class="flex flex-col lg:flex-row gap-10 items-center">
                 <div class="lg:w-1/2">
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6">Contáctanos</h2>
-                    <p class="text-xl text-gray-600 mb-8">Completa el formulario y un asesor especializado se pondrá en contacto contigo en menos de 24 horas para diseñar una solución a medida.</p>
+                    <p class="text-gray-700 mb-6">Somos especialistas en la gestión de alojamientos turísticos en toda la costa de Alicante. Conocemos cada barrio, sus particularidades y la demanda estacional que tiene cada zona.</p>
                     
-                    <div class="space-y-6">
-                        <div class="flex items-start">
-                            <div class="flex items-center justify-center w-12 h-12 rounded-full bg-indigo-50 text-indigo-600 mr-4">
-                                <i class="fas fa-phone-alt text-xl"></i>
+                    <p class="text-gray-700 mb-6">En PropiedadExpress gestionamos propiedades en toda la provincia de Alicante, con especial enfoque en las zonas turísticas como Playa San Juan, Alicante Centro, Cabo de las Huertas, Benidorm, Villajoyosa y Campoamor.</p>
+                    
+                    <div class="bg-white p-6 rounded-xl shadow-lg">
+                        <h3 class="font-bold text-xl mb-4">Zonas que cubrimos:</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            <div class="flex items-center">
+                                <i class="fas fa-check text-primary mr-2"></i>
+                                <span>Centro de Alicante</span>
                             </div>
-                            <div>
-                                <h4 class="font-bold text-gray-800 mb-1">Teléfono</h4>
-                                <p class="text-gray-600">(+34) 910 123 456</p>
+                            <div class="flex items-center">
+                                <i class="fas fa-check text-primary mr-2"></i>
+                                <span>Playa San Juan</span>
                             </div>
-                        </div>
-                        
-                        <div class="flex items-start">
-                            <div class="flex items-center justify-center w-12 h-12 rounded-full bg-indigo-50 text-indigo-600 mr-4">
-                                <i class="fas fa-envelope text-xl"></i>
+                            <div class="flex items-center">
+                                <i class="fas fa-check text-primary mr-2"></i>
+                                <span>Cabo Huertas</span>
                             </div>
-                            <div>
-                                <h4 class="font-bold text-gray-800 mb-1">Email</h4>
-                                <p class="text-gray-600">info@tourismogest.com</p>
+                            <div class="flex items-center">
+                                <i class="fas fa-check text-primary mr-2"></i>
+                                <span>El Campello</span>
                             </div>
-                        </div>
-                        
-                        <div class="flex items-start">
-                            <div class="flex items-center justify-center w-12 h-12 rounded-full bg-indigo-50 text-indigo-600 mr-4">
-                                <i class="fas fa-map-marker-alt text-xl"></i>
+                            <div class="flex items-center">
+                                <i class="fas fa-check text-primary mr-2"></i>
+                                <span>Campoamor</span>
                             </div>
-                            <div>
-                                <h4 class="font-bold text-gray-800 mb-1">Oficina</h4>
-                                <p class="text-gray-600">Calle Ejemplo, 123, 28001 Madrid</p>
+                            <div class="flex items-center">
+                                <i class="fas fa-check text-primary mr-2"></i>
+                                <span>Villajoyosa</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-check text-primary mr-2"></i>
+                                <span>Benidorm</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-check text-primary mr-2"></i>
+                                <span>Santa Pola</span>
                             </div>
                         </div>
                     </div>
                 </div>
                 
-                <div class="lg:w-1/2 w-full">
-                    <form class="bg-gray-50 rounded-xl p-8 shadow-sm">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                            <div>
-                                <label for="nombre" class="block text-gray-700 font-medium mb-2">Nombre *</label>
-                                <input type="text" id="nombre" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" required>
-                            </div>
-                            <div>
-                                <label for="apellidos" class="block text-gray-700 font-medium mb-2">Apellidos *</label>
-                                <input type="text" id="apellidos" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" required>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-6">
-                            <label for="email" class="block text-gray-700 font-medium mb-2">Email *</label>
-                            <input type="email" id="email" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" required>
-                        </div>
-                        
-                        <div class="mb-6">
-                            <label for="telefono" class="block text-gray-700 font-medium mb-2">Teléfono *</label>
-                            <input type="tel" id="telefono" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" required>
-                        </div>
-                        
-                        <div class="mb-6">
-                            <label for="interes" class="block text-gray-700 font-medium mb-2">Plan de interés *</label>
-                            <select id="interes" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" required>
-                                <option value="">Selecciona una opción</option>
-                                <option value="parcial">Gestión Parcial (15%)</option>
-                                <option value="total">Gestión Total (25%)</option>
-                                <option value="consultoria">Asesoría personalizada</option>
-                            </select>
-                        </div>
-                        
-                        <div class="mb-6">
-                            <label for="mensaje" class="block text-gray-700 font-medium mb-2">Mensaje</label>
-                            <textarea id="mensaje" rows="4" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"></textarea>
-                        </div>
-                        
-                        <button type="submit" class="w-full px-6 py-4 rounded-full btn-gradient text-white font-bold hover:opacity-90 transition duration-300">Enviar consulta</button>
-                    </form>
+                <div class="lg:w-1/2">
+                    <div id="map" class="h-96 rounded-xl shadow-xl w-full"></div>
                 </div>
             </div>
         </div>
     </section>
-
+    
     <!-- Footer -->
-    <footer class="bg-gray-900 text-white py-12">
+    <footer class="bg-accent text-white pt-16">
         <div class="container mx-auto px-4">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+                <!-- Logo and description -->
                 <div>
                     <div class="flex items-center mb-6">
-                        <i class="fas fa-home-alt text-2xl mr-2 text-indigo-400"></i>
-                        <span class="text-xl font-bold">Turismo<span class="text-indigo-400">Gest</span></span>
+                        <div class="bg-white w-10 h-10 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-home text-primary text-xl"></i>
+                        </div>
+                        <span class="ml-3 text-xl font-bold">Propiedad<span class="text-secondary">Express</span></span>
                     </div>
-                    <p class="text-gray-400 mb-4">Soluciones profesionales para la gestión de tus alojamientos turísticos.</p>
+                    <p class="text-gray-200 mb-4">Expertos en la gestión de alojamientos turísticos en Alicante. Maximizamos tus ingresos mientras tú disfrutas de tu tiempo.</p>
                     <div class="flex space-x-4">
-                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-instagram"></i></a>
-                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" class="text-gray-300 hover:text-white"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-gray-300 hover:text-white"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-gray-300 hover:text-white"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" class="text-gray-300 hover:text-white"><i class="fab fa-youtube"></i></a>
                     </div>
                 </div>
                 
+                <!-- Links -->
                 <div>
-                    <h4 class="text-lg font-bold mb-6">Servicios</h4>
+                    <h3 class="text-lg font-bold mb-6">Enlaces rápidos</h3>
                     <ul class="space-y-3">
-                        <li><a href="#" class="text-gray-400 hover:text-white transition">Gestión Parcial</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition">Gestión Total</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition">Fotografía profesional</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition">Limpieza profesional</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition">Check-in/Check-out</a></li>
+                        <li><a href="#inicio" class="text-gray-300 hover:text-white">Inicio</a></li>
+                        <li><a href="#servicios" class="text-gray-300 hover:text-white">Servicios</a></li>
+                        <li><a href="#trabajo" class="text-gray-300 hover:text-white">Cómo trabajamos</a></li>
+                        <li><a href="#propietarios" class="text-gray-300 hover:text-white">Propietarios</a></li>
+                        <li><a href="#faq" class="text-gray-300 hover:text-white">Preguntas frecuentes</a></li>
                     </ul>
                 </div>
                 
+                <!-- Legal -->
                 <div>
-                    <h4 class="text-lg font-bold mb-6">Enlaces útiles</h4>
+                    <h3 class="text-lg font-bold mb-6">Legal</h3>
                     <ul class="space-y-3">
-                        <li><a href="#" class="text-gray-400 hover:text-white transition">Blog</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition">Preguntas frecuentes</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition">Política de privacidad</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition">Términos y condiciones</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition">Trabaja con nosotros</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white">Aviso legal</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white">Política de privacidad</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white">Política de cookies</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white">Términos del servicio</a></li>
                     </ul>
                 </div>
                 
+                <!-- Contact -->
                 <div>
-                    <h4 class="text-lg font-bold mb-6">Newsletter</h4>
-                    <p class="text-gray-400 mb-4">Suscríbete para recibir consejos y ofertas exclusivas.</p>
-                    <form class="flex">
-                        <input type="email" placeholder="Tu email" class="px-4 py-2 rounded-l-lg text-gray-900 w-full focus:outline-none">
-                        <button type="submit" class="bg-indigo-600 px-4 py-2 rounded-r-lg hover:bg-indigo-700 transition">
-                            <i class="fas fa-paper-plane"></i>
-                        </button>
-                    </form>
+                    <h3 class="text-lg font-bold mb-6">Contacto</h3>
+                    <ul class="space-y-4">
+                        <li class="flex">
+                            <i class="fas fa-map-marker-alt text-secondary mt-1 mr-3"></i>
+                            <span>Av. de Denia, 15, 03015 Alicante</span>
+                        </li>
+                        <li class="flex">
+                            <i class="fas fa-phone-alt text-secondary mt-1 mr-3"></i>
+                            <span>+34 965 123 456</span>
+                        </li>
+                        <li class="flex">
+                            <i class="fas fa-envelope text-secondary mt-1 mr-3"></i>
+                            <span>info@propiedadespress.com</span>
+                        </li>
+                    </ul>
                 </div>
             </div>
             
-            <div class="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400 text-sm">
-                <p>&copy; 2023 TurismoGest. Todos los derechos reservados.</p>
+            <!-- Bottom Footer -->
+            <div class="border-t border-gray-700 mt-10 pt-6 pb-6 text-center text-gray-400">
+                <p>&copy; 2023 PropiedadExpress. Todos los derechos reservados.</p>
             </div>
         </div>
     </footer>
-
+    
+    <!-- Floating WhatsApp Button -->
+    <a href="https://wa.me/34640388619" class="floating-cta bg-green-500 text-white p-4 rounded-full shadow-lg" target="_blank">
+        <i class="fab fa-whatsapp text-2xl"></i>
+    </a>
+    
     <script>
-        // Smooth scrolling for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
-                });
-            });
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-button').addEventListener('click', function() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
         });
-
-        // FAQ accordion functionality
-        document.querySelectorAll('.faq button').forEach(button => {
-            button.addEventListener('click', () => {
-                const faqItem = button.parentElement;
-                const answer = button.nextElementSibling;
+        
+        // FAQ toggle
+        document.querySelectorAll('.faq-question').forEach(question => {
+            question.addEventListener('click', () => {
+                const answer = question.nextElementSibling;
+                question.classList.toggle('active');
                 
-                // Close all other FAQ items
-                document.querySelectorAll('.faq div').forEach(item => {
-                    if (item !== faqItem && item.classList.contains('active')) {
-                        item.classList.remove('active');
-                        item.querySelector('div').style.maxHeight = '0';
-                        item.querySelector('i').classList.replace('fa-chevron-up', 'fa-chevron-down');
-                    }
-                });
-                
-                // Toggle current FAQ item
-                faqItem.classList.toggle('active');
-                const icon = button.querySelector('i');
-                
-                if (faqItem.classList.contains('active')) {
+                if (question.classList.contains('active')) {
                     answer.style.maxHeight = answer.scrollHeight + 'px';
-                    icon.classList.replace('fa-chevron-down', 'fa-chevron-up');
                 } else {
                     answer.style.maxHeight = '0';
-                    icon.classList.replace('fa-chevron-up', 'fa-chevron-down');
                 }
+            });
+        });
+        
+        // Map initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            const map = L.map('map').setView([38.3452, -0.4830], 11);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+            
+            // Add markers for coverage areas
+            const locations = [
+                {name: "Alicante Centro", coords: [38.3452, -0.4830]},
+                {name: "Playa San Juan", coords: [38.3687, -0.4047]},
+                {name: "Cabo de las Huertas", coords: [38.3679, -0.3931]},
+                {name: "El Campello", coords: [38.4289, -0.3990]},
+                {name: "Benidorm", coords: [38.5411, -0.1225]},
+                {name: "Villajoyosa", coords: [38.5070, -0.2306]}
+            ];
+            
+            locations.forEach(loc => {
+                L.marker(loc.coords).addTo(map)
+                    .bindPopup(loc.name);
+            });
+            
+            // Form submission
+            async function submitValuationForm(event) {
+                event.preventDefault();
+                
+                const form = event.target;
+                const formData = {
+                    name: form.querySelector('input[type="text"]').value,
+                    email: form.querySelector('input[type="email"]').value,
+                    phone: form.querySelector('input[type="tel"]').value,
+                    propertyType: form.querySelector('select').value,
+                    address: form.querySelector('input[placeholder="Calle, número, ciudad"]').value
+                };
+
+                try {
+                    const response = await fetch('/api/valuation', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(formData)
+                    });
+
+                    if (response.ok) {
+                        alert('¡Gracias por tu solicitud! Te enviaremos la valoración en menos de 24 horas.');
+                        form.reset();
+                    } else {
+                        throw new Error('Error al enviar el formulario');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Hubo un error al enviar tu solicitud. Por favor, inténtalo de nuevo más tarde.');
+                }
+            }
+            
+            // Add scroll offset for navigation links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        // Mobile menu close if open
+                        document.getElementById('mobile-menu').classList.add('hidden');
+                        
+                        window.scrollTo({
+                            top: target.offsetTop - 100,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+            
+            // Sticky nav shadow effect
+            window.addEventListener('scroll', function() {
+                const header = document.querySelector('header');
+                header.classList.toggle('shadow-lg', window.scrollY > 10);
             });
         });
     </script>
